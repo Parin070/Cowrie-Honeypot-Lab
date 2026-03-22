@@ -39,8 +39,6 @@ Kali Linux (Attacker) → Cowrie Honeypot (Ubuntu Server) → Wazuh SIEM (Dashbo
 
 See `WRITEUP.md` for detailed setup walkthrough and troubleshooting notes.
 
-## Planned
+## Status
 
-- [ ] Wazuh agent integration for log forwarding
-- [ ] JSON log output configuration
-- [ ] Attack simulation from Kali Linux
+Cowrie is fully operational and the Wazuh agent is enrolled and active on the Ubuntu Server. JSON log output configuration and attack simulation from Kali Linux are pending.
