@@ -128,9 +128,96 @@ Checked the logs to confirm the connection was captured:
 ```bash
 cat ~/cowrie/var/log/cowrie/cowrie.log
 ```
+---
+
+## Wazuh Agent Integration
+
+### Objective
+Install and enroll the Wazuh agent on the Ubuntu Server VM so Cowrie logs can be forwarded to the Wazuh SIEM dashboard.
 
 ---
 
-## Outcome
+### Step 1: Add Host-Only Network Adapter
 
-Cowrie is fully operational and logging SSH connections. Next steps are Wazuh integration for log forwarding and attack simulation from Kali Linux.
+Both VMs were on NAT by default, meaning they couldn't communicate with each other. To enable inter-VM communication, a second Host-Only adapter was added to both the Ubuntu Desktop (Wazuh manager) and Ubuntu Server (Cowrie).
+
+In VirtualBox for each VM:
+- Settings → Network → Adapter 2
+- Attached to: Host-Only Adapter
+- Promiscuous Mode: Allow All
+
+![Host-Only adapter settings](assets/wazuh-adapter-settings.png)
+
+---
+
+### Step 2: Assign Static IP to Ubuntu Server
+
+After booting, `enp0s8` (Host-Only interface) had no IP address assigned. `dhclient` was not available on Ubuntu Server 24, so the IP was assigned manually:
+```bash
+sudo ip link set enp0s8 up
+sudo ip addr add 192.168.56.10/24 dev enp0s8
+```
+
+![enp0s8 IP assigned](assets/wazuh-ip.png)
+
+To make the IP persistent across reboots, the netplan config was updated:
+```bash
+sudo nano /etc/netplan/50-cloud-init.yaml
+```
+```yaml
+network:
+  version: 2
+  ethernets:
+    enp0s3:
+      dhcp4: true
+    enp0s8:
+      dhcp4: no
+      addresses:
+        - 192.168.56.10/24
+```
+```bash
+sudo netplan apply
+```
+
+![Netplan config](assets/wazuh-netplan.png)
+
+---
+
+### Step 3: Install Wazuh Agent
+
+From the Wazuh dashboard on the Desktop VM:
+- Navigated to **Agents → Deploy new agent**
+- Selected Linux (DEB), entered the manager's Host-Only IP, named the agent `cowrie-server`
+- Copied the generated install command and ran it on the Ubuntu Server
+
+![Wazuh deploy agent page](assets/wazuh-deploy-agent.png)
+
+---
+
+### Step 4: Start and Enroll the Agent
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable wazuh-agent
+sudo systemctl start wazuh-agent
+```
+
+Verified status:
+```bash
+sudo systemctl status wazuh-agent
+```
+
+![Wazuh agent running](assets/wazuh-agent-running.png)
+
+---
+
+### Step 5: Confirm on Dashboard
+
+Agent appeared as **Active** on the Wazuh dashboard under Agents.
+
+![Wazuh agent active on dashboard](assets/wazuh-agent-dashboard.png)
+
+---
+
+### Outcome
+
+Wazuh agent successfully enrolled and communicating with the manager. Next step is configuring Cowrie JSON log output and pointing the Wazuh agent at the log file.
