@@ -190,7 +190,8 @@ From the Wazuh dashboard on the Desktop VM:
 - Selected Linux (DEB), entered the manager's Host-Only IP, named the agent `cowrie-server`
 - Copied the generated install command and ran it on the Ubuntu Server
 
-![Wazuh deploy agent page](assets/wazuh-deploy-agent.png)
+![Wazuh deploy agent page](assets/wazuh-deploy-agent1.png)
+![Wazuh deploy agent page](assets/wazuh-deploy-agent2.png)
 
 ---
 
@@ -213,8 +214,6 @@ sudo systemctl status wazuh-agent
 ### Step 5: Confirm on Dashboard
 
 Agent appeared as **Active** on the Wazuh dashboard under Agents.
-
-![Wazuh agent active on dashboard](assets/wazuh-agent-dashboard.png)
 
 ---
 
