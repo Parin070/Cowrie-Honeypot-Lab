@@ -1,0 +1,39 @@
+<group name="cowrie,">
+
+  <rule id="100001" level="5">
+    <decoded_as>json</decoded_as>
+    <field name="eventid">^cowrie.session.connect$</field>
+    <description>Cowrie: New connection to honeypot from $(src_ip)</description>
+  </rule>
+
+  <rule id="100002" level="8">
+    <decoded_as>json</decoded_as>
+    <field name="eventid">^cowrie.login.failed$</field>
+    <description>Cowrie: Failed login attempt - user: $(username)</description>
+  </rule>
+
+  <rule id="100003" level="10">
+    <decoded_as>json</decoded_as>
+    <field name="eventid">^cowrie.login.success$</field>
+    <description>Cowrie: Successful login to honeypot - user: $(username)</description>
+  </rule>
+
+  <rule id="100004" level="8">
+    <decoded_as>json</decoded_as>
+    <field name="eventid">^cowrie.command.input$</field>
+    <description>Cowrie: Command executed in honeypot - $(input)</description>
+  </rule>
+
+  <rule id="100005" level="10">
+    <decoded_as>json</decoded_as>
+    <field name="eventid">^cowrie.session.file_download$</field>
+    <description>Cowrie: File download attempted in honeypot - $(url)</description>
+  </rule>
+
+  <rule id="100006" level="12">
+    <decoded_as>json</decoded_as>
+    <field name="eventid">^cowrie.session.file_upload$</field>
+    <description>Cowrie: File upload attempted in honeypot</description>
+  </rule>
+
+</group>
