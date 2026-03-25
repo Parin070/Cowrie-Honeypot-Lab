@@ -217,6 +217,107 @@ Agent appeared as **Active** on the Wazuh dashboard under Agents.
 
 ---
 
+### Step 6: Configure Wazuh Agent to Read Cowrie Logs
+
+The Wazuh agent needs to know where Cowrie's JSON log file is. This is done by adding a `<localfile>` block to the agent config:
+```bash
+sudo nano /var/ossec/etc/ossec.conf
+```
+
+Added the following block inside `<ossec_config>`:
+```xml
+<localfile>
+  <log_format>json</log_format>
+  <location>/home/cowrie/cowrie/var/log/cowrie/cowrie.json</location>
+</localfile>
+```
+Restarted the agent:
+```bash
+sudo systemctl restart wazuh-agent
+```
+
+![ossec.conf localfile block](assets/wazuh-ossec-config.png)
+
+---
+
+### Troubleshooting: Agent Showing as Disconnected
+
+After restarting, the dashboard still showed the agent as **Disconnected**. Checked the manager logs:
+```bash
+sudo tail -20 /var/ossec/logs/ossec.log
+```
+
+Output showed:
+```
+WARNING: Duplicate name 'cowrie-server', rejecting enrollment.
+Agent '001' has not been disconnected long enough to be replaced.
+```
+
+The agent name was already registered from a previous enrollment and the manager was rejecting the reconnection. Fixed by restarting the manager:
+```bash
+sudo systemctl restart wazuh-manager
+```
+
+Agent showed as **Active** on the dashboard shortly after.
+
+---
+
+### Step 7: Enable Log Archiving on the Wazuh Manager
+
+To confirm logs were being received, archiving was enabled on the manager:
+```bash
+sudo nano /var/ossec/etc/ossec.conf
+```
+
+Added to the `<global>` section:
+```xml
+<global>
+  <logall>yes</logall>
+  <logall_json>yes</logall_json>
+</global>
+```
+
+Restarted the manager:
+```bash
+sudo systemctl restart wazuh-manager
+```
+
+Verified Cowrie events were arriving:
+```bash
+sudo tail -f /var/ossec/logs/archives/archives.json | grep cowrie
+```
+
+![Cowrie logs in archives](assets/wazuh-archives-config.png)
+
+---
+
+### Step 8: Create Custom Detection Rules for Cowrie
+
+Custom rules were added via **Server Management → Rules → Add new rules file** on the Wazuh dashboard, named `cowrie_rules.xml`:
+See [`cowrie_rules.xml`](cowrie_rules.xml) for the full rule definitions.
+
+Restarted the manager from the dashboard prompt to apply rules.
+
+![Custom rules on Wazuh dashboard](assets/cowrie-rules.png)
+
+---
+
+### Step 9: Test and Verify
+
+Triggered a test event by attempting an SSH login to Cowrie:
+```bash
+ssh root@localhost -p 2222
+```
+
+Navigated to **Explore → Discover** on the Wazuh dashboard and searched for `cowrie`. Alerts from the custom rules were visible confirming the full pipeline was working.
+
+![Activity on the honeypot](assets/test01.png)
+![Cowrie alerts on Wazuh dashboard](assets/wazuh-alerts1.png)
+![Activity on the honeypot](assets/test02.png)
+![Cowrie alerts on Wazuh dashboard](assets/wazuh-alerts2.png)
+
+---
+
 ### Outcome
 
-Wazuh agent successfully enrolled and communicating with the manager. Next step is configuring Cowrie JSON log output and pointing the Wazuh agent at the log file.
+The Cowrie + Wazuh integration is fully operational. SSH honeypot activity on the Ubuntu Server is now automatically detected, forwarded, and alerted on within the Wazuh SIEM dashboard in real time.
