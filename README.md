@@ -102,6 +102,14 @@ Web UI that displays all alerts, attacker IPs, and session activity pulled from 
 
 See `WRITEUP.md` for detailed setup walkthrough and troubleshooting notes.
 
+## What I Learned
+
+- **How honeypots work** — Deception-based security in practice; letting attackers in on purpose to observe behavior without exposing real systems.
+- **How attacks happen** — Brute-force attempts, credential stuffing, and post-login commands like `wget` and `chmod +x` went from textbook concepts to things I could see in logs in real time.
+- **Linux networking & iptables** — How traffic is isolated across VMs and how packet-level redirection works (port 22 → 2222).
+- **Wazuh/SIEM setup** — How a SIEM is architected, how agents communicate with a manager, and what it takes to get a full monitoring stack running.
+- **Log analysis & detection rules** — How SIEMs turn raw JSON logs into actionable alerts using decoders, pattern matching, and rule chaining.
+
 ## Status
 
 Cowrie is fully operational with the Wazuh integration complete. SSH honeypot activity is being forwarded to the Wazuh SIEM dashboard and triggering custom detection rules in real time. Attack simulation from Kali Linux and Suricata IDS integration are pending.
