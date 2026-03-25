@@ -15,9 +15,72 @@ Cowrie is an SSH honeypot that simulates a vulnerable SSH server. When an attack
 - **SIEM:** Wazuh (planned integration)
 
 ## Architecture
+
+### Network Setup
+
+All virtual machines use two adapters each:
+
+| Adapter | Purpose |
+|---|---|
+| NAT | Internet access (updates, package installs) |
+| Host-Only | Internal lab communication between VMs |
+
+The Host-Only network is how Kali reaches Cowrie to simulate attacks, and how the Wazuh Agent forwards logs to the Wazuh Manager.
+
+---
+
+### Attack Flow
+
 ```
-Kali Linux (Attacker) → Cowrie Honeypot (Ubuntu Server) → Wazuh SIEM (Dashboard)
+Attacker (Kali Linux)
+        │
+        │  SSH to port 22
+        ▼
+Ubuntu Server (iptables)
+        │
+        │  Redirects to port 2222
+        ▼
+Cowrie Honeypot
+        │
+        │  Writes cowrie.json
+        ▼
+Wazuh Agent
+        │
+        │  Forwards over TLS (port 1514)
+        ▼
+Wazuh Manager → OpenSearch → Wazuh Dashboard
 ```
+
+---
+
+### Components
+
+**Cowrie (Honeypot)**
+Emulates a vulnerable SSH server on port 2222, accepting attacker logins and recording every credential and command entered. Nothing is actually executed — it's a fully faked shell environment.
+
+**iptables (Port Redirect)**
+Silently redirects inbound traffic from port 22 to port 2222, making Cowrie appear as a legitimate SSH service to the attacker.
+
+**Wazuh Agent**
+Runs on the Ubuntu Server and monitors Cowrie's JSON log file. Ships new log entries to the Wazuh Manager in real time over an encrypted connection.
+
+**Wazuh Manager**
+Parses incoming Cowrie logs using custom decoders and runs them through detection rules to flag brute-force attempts, suspicious commands, and malware download patterns.
+
+**Wazuh Dashboard**
+Web UI that displays all alerts, attacker IPs, and session activity pulled from OpenSearch in real time.
+
+---
+
+### Port Reference
+
+| Port | Service | Notes |
+|---|---|---|
+| 22 | SSH (public-facing) | Redirected to Cowrie via iptables |
+| 2222 | Cowrie | Actual honeypot listener |
+| 2223 | Real SSH | Admin access (moved off port 22) |
+| 1514 | Wazuh Agent → Manager | Log forwarding over TLS |
+| 5601 | Wazuh Dashboard | Web UI |
 
 ## Setup Overview
 
