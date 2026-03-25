@@ -41,4 +41,6 @@ See `WRITEUP.md` for detailed setup walkthrough and troubleshooting notes.
 
 ## Status
 
-Cowrie is fully operational and the Wazuh agent is enrolled and active on the Ubuntu Server. JSON log output configuration and attack simulation from Kali Linux are pending.
+## Status
+
+Cowrie is fully operational with the Wazuh integration complete. SSH honeypot activity is being forwarded to the Wazuh SIEM dashboard and triggering custom detection rules in real time. Attack simulation from Kali Linux and Suricata IDS integration are pending.
