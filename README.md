@@ -78,7 +78,7 @@ Web UI that displays all alerts, attacker IPs, and session activity pulled from 
 |---|---|---|
 | 22 | SSH (public-facing) | Redirected to Cowrie via iptables |
 | 2222 | Cowrie | Actual honeypot listener |
-| 2223 | Real SSH | Admin access (moved off port 22) |
+| 22222 | Real SSH | Admin access (moved off port 22) |
 | 1514 | Wazuh Agent → Manager | Log forwarding over TLS |
 | 5601 | Wazuh Dashboard | Web UI |
 
